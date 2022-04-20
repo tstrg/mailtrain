@@ -125,7 +125,7 @@ function _senderIsEnabledForDay(enabledDaysInWeek, date) {
 
 // e.g. for enabling working days only
 // enabledDaysInWeek = [0, 1, 1, 1, 1, 1, 0] from Sunday to Saturday
-// returns value in seconds
+// returns value in milliseconds
 function _senderTimeToNextEnabledDay(enabledDaysInWeek) {
 
     if (!Array.isArray(enabledDaysInWeek)) return 0;
@@ -144,7 +144,7 @@ function _senderTimeToNextEnabledDay(enabledDaysInWeek) {
   
         d.setDate(dateNow.getDate() + daysToNextEnabledDay); // add days 
         _senderIsEnabledForDay(enabledDaysInWeek, d)
-        timeToNextEnabledDay = d.getTime() - dateNow.getTime(); // to seconds
+        timeToNextEnabledDay = d.getTime() - dateNow.getTime();
         if (timeToNextEnabledDay < 0) timeToNextEnabledDay = 0;
         return timeToNextEnabledDay;
       }
