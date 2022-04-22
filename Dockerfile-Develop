@@ -6,7 +6,7 @@ WORKDIR /app/
 # Install system dependencies
 RUN set -ex; \
     apk add --update --no-cache \
-    apk add realpath \
+    apk add coreutils \
     make gcc g++ git python pwgen netcat-openbsd bash imagemagick
 
 EXPOSE 3000 3003 3004
