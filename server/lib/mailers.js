@@ -159,10 +159,11 @@ function _senderTimeToNextEnabledDay(enabledDaysInWeek) {
       const timeNow = Date.now();
       if (throttlingWarmUpFrom > timeNow) throttlingWarmUpFrom = timeNow;
   
-      const warmingUpDays = _daysBetween(timeNow, throttlingWarmUpFrom);
+      let warmingUpDays = _daysBetween(timeNow, throttlingWarmUpFrom);      
+
       if (warmingUpDays < throttlingWarmUpDays) {
         let warmUpMultiplicator = warmingUpDays / throttlingWarmUpDays;
-        log.verbose('Mail', 'Warn up day %s/%s, warmUpMultiplicator %s)', warmingUpDays, throttlingWarmUpDays, warmUpMultiplicator);
+        log.verbose('Mail', 'Warm up day %s/%s, warmUpMultiplicator %s)', warmingUpDays, throttlingWarmUpDays, warmUpMultiplicator);
         return warmUpMultiplicator;
       }
     }
@@ -173,6 +174,8 @@ function _senderTimeToNextEnabledDay(enabledDaysInWeek) {
 async function _createTransport(sendConfiguration) {
     const mailerSettings = sendConfiguration.mailer_settings;
     const mailerType = sendConfiguration.mailer_type;
+    const mailerId = sendConfiguration.id;
+    const mailerName = sendConfiguration.name;
     const configItems = await settings.get(contextHelpers.getAdminContext(), ['pgpPrivateKey', 'pgpPassphrase']);
 
     const existingTransport = transports.get(sendConfiguration.id);
@@ -307,7 +310,13 @@ async function _createTransport(sendConfiguration) {
         
         let timeToNextEnabledDay = _senderTimeToNextEnabledDay(enabledDaysInWeek);    
         throttling = Math.max(throttling,timeToNextEnabledDay);
-        log.verbose('Mail', 'Throttling changed from %s to %s (throttlingWarmUp in %s ms, timeToNextEnabledDay in %s ms)', throttlingOrig, throttling, throttlingWarmUp, timeToNextEnabledDay);
+
+        // If throttling is Infinity, use throttlingOrig value
+        if (!isFinite(throttling)) {
+            throttling = throttlingOrig;
+        }
+
+        log.verbose('Mail', 'Throttling changed from %s to %s (throttlingWarmUp in %s ms, timeToNextEnabledDay in %s ms), Mailer id: %s, name: %s', throttlingOrig, throttling, throttlingWarmUp, timeToNextEnabledDay, mailerId, mailerName);
 
         let lastCheck = Date.now();
 
